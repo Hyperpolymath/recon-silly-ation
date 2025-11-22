@@ -455,13 +455,50 @@ GitHub Actions workflow includes:
 
 WASM provides 2-5x performance improvement for critical operations.
 
+== RSR Compliance
+
+This project follows the *RSR (Rhodium Standard Repository)* framework for software quality and community governance.
+
+*Compliance Status*: Silver Tier (Target: 80%+)
+
+*Framework Categories*:
+
+* ✅ Documentation (README, CONTRIBUTING, CHANGELOG, etc.)
+* ✅ Security (.well-known/security.txt, SECURITY.md)
+* ✅ Licensing (Dual MIT + Palimpsest v0.8)
+* ✅ Build Reproducibility (flake.nix, justfile, Containerfile)
+* ✅ Testing (tests/, CI/CD)
+* ✅ Community Governance (CODE_OF_CONDUCT, MAINTAINERS)
+* ✅ Offline-First (documented capabilities)
+* ✅ Type Safety (ReScript + Haskell + Rust)
+* ✅ Memory Safety (Rust ownership model)
+* ✅ Attribution (.well-known/humans.txt)
+* ✅ AI Training Policy (.well-known/ai.txt)
+
+*TPCF Governance*: Perimeter 3 (Community Sandbox) - See link:docs/TPCF.adoc[]
+
+*Compliance Audit*: link:docs/RSR-COMPLIANCE-AUDIT.adoc[]
+
+Verify compliance:
+[source,bash]
+----
+deno run --allow-read scripts/verify-rsr-compliance.ts
+----
+
 == License
 
-MIT License - see link:LICENSE.txt[] for details.
+Dual License:
+
+* MIT License
+* Palimpsest License v0.8
+
+See link:LICENSE.txt[] for details.
 
 == Security
 
 See link:SECURITY.md[] for vulnerability reporting.
+
+RFC 9116 security.txt: link:.well-known/security.txt[]
 
 == Acknowledgments
 

@@ -1,0 +1,90 @@
+# humanstxt.org
+
+/* TEAM */
+
+Project Lead: Hyperpolymath
+Site: https://github.com/Hyperpolymath
+Location: Distributed
+
+/* THANKS */
+
+Deno Team - Secure TypeScript runtime
+Rust Community - WebAssembly tooling and memory safety
+ReScript Team - Type-safe functional programming
+ArangoDB Team - Multi-model graph database
+Haskell Community - Formal verification and type theory
+Anthropic - Claude AI assistance and code generation
+GitHub/GitLab - Hosting and CI/CD infrastructure
+
+/* SITE */
+
+Project: recon-silly-ation
+Repository: https://github.com/Hyperpolymath/recon-silly-ation
+Documentation: https://github.com/Hyperpolymath/recon-silly-ation/tree/main/docs
+Standards: RSR (Rhodium Standard Repository), TPCF Perimeter 3
+Last Update: 2025-11-22
+Language: English
+Doctype: AsciiDoc
+IDE: (Various - VS Code, Vim, Emacs, etc.)
+
+/* TECHNOLOGY */
+
+Backend: Deno, ReScript, Rust (WASM), Haskell
+Database: ArangoDB
+Containerization: Podman
+Build: Just, Deno tasks, Cargo
+CI/CD: GitHub Actions
+Documentation: AsciiDoc, Markdown
+Version Control: Git
+
+/* SPECIAL FEATURES */
+
+- WASM acceleration (2-5x performance improvement)
+- Content-addressable storage (SHA-256)
+- Graph-based conflict resolution
+- LLM integration with guardrails
+- Logical inference (miniKanren/Datalog)
+- Multi-language type safety (ReScript + Haskell + Rust)
+- Offline-first architecture
+- AOT compilation support
+
+/* PHILOSOPHY */
+
+- Type safety over convenience
+- Memory safety by default
+- Offline-first design
+- Emotional safety in community
+- Reversibility and experimentation
+- Minimal dependencies
+- Documentation as code
+- Security by design
+
+/* LICENSE */
+
+Dual License:
+- MIT License
+- Palimpsest License v0.8
+
+See LICENSE.txt for full terms.
+
+/* RSR COMPLIANCE */
+
+Framework: Rhodium Standard Repository (RSR)
+Tier: Silver (target)
+Categories: 11/11 implemented
+Offline-First: Yes
+Type Safety: Yes (ReScript + Haskell + Rust)
+Memory Safety: Yes (Rust ownership, GC in others)
+TPCF Perimeter: 3 (Community Sandbox)
+
+/* CONTRIBUTING */
+
+Contributions welcome! See CONTRIBUTING.adoc
+Code of Conduct: CODE_OF_CONDUCT.md (Contributor Covenant 2.1)
+Governance: MAINTAINERS.md
+
+/* CONTACT */
+
+Issues: https://github.com/Hyperpolymath/recon-silly-ation/issues
+Security: security@example.com (see SECURITY.md)
+Community: community@example.com

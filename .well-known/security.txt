@@ -1,0 +1,22 @@
+Contact: security@example.com
+Expires: 2026-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://github.com/Hyperpolymath/recon-silly-ation/.well-known/security.txt
+Policy: https://github.com/Hyperpolymath/recon-silly-ation/blob/main/SECURITY.md
+Hiring: https://github.com/Hyperpolymath/recon-silly-ation/blob/main/CONTRIBUTING.adoc
+
+# Security Contact Information for recon-silly-ation
+# RFC 9116 compliant security.txt file
+#
+# DO NOT create public GitHub issues for security vulnerabilities.
+# Instead, email security@example.com or use GitHub Security Advisories.
+#
+# Our security policy: https://github.com/Hyperpolymath/recon-silly-ation/blob/main/SECURITY.md
+#
+# PGP Key: (Add PGP key fingerprint here if available)
+# Acknowledgments: https://github.com/Hyperpolymath/recon-silly-ation/security/advisories
+#
+# This project follows:
+# - RSR (Rhodium Standard Repository) security standards
+# - TPCF Perimeter 3 (Community Sandbox) governance
+# - Responsible disclosure policy (90-day embargo)
