@@ -1,168 +1,106 @@
-# Build automation for recon-silly-ation
+# Build automation for recon-silly-ation (Deno + WASM + Podman)
 # https://github.com/casey/just
 
 # Default recipe
 default:
     @just --list
 
-# Install dependencies
-install:
-    npm install
+# Install Deno (if not already installed)
+install-deno:
+    @if ! command -v deno &> /dev/null; then \
+        echo "Installing Deno..."; \
+        curl -fsSL https://deno.land/install.sh | sh; \
+    else \
+        echo "Deno already installed:"; \
+        deno --version; \
+    fi
 
-# Build ReScript code
-build:
-    npm run build
+# Install Rust (for WASM building)
+install-rust:
+    @if ! command -v cargo &> /dev/null; then \
+        echo "Installing Rust..."; \
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
+    else \
+        echo "Rust already installed:"; \
+        rustc --version; \
+    fi
+
+# Cache Deno dependencies
+cache:
+    deno cache src/main.ts
+
+# Build WASM modules from Rust
+build-wasm: install-rust
+    deno task build:wasm
+
+# Build everything
+build: build-wasm cache
+    @echo "✅ Build complete"
 
 # Clean build artifacts
 clean:
-    npm run clean
     rm -rf lib/
-
-# Watch mode for development
-watch:
-    npm run watch
+    rm -rf wasm-modules/target/
+    rm -rf bin/
+    rm -f src/wasm/hasher.wasm
+    @echo "✅ Cleaned"
 
 # Run the CLI
 run *ARGS:
-    node lib/js/src/CLI.bs.js {{ARGS}}
+    deno run --allow-all src/main.ts {{ARGS}}
 
-# Run pipeline on a repository
+# Scan a repository
 scan REPO:
-    node lib/js/src/CLI.bs.js --repo {{REPO}}
+    deno run --allow-all src/main.ts scan --repo {{REPO}}
 
 # Run in daemon mode
 daemon REPO INTERVAL="300":
-    node lib/js/src/CLI.bs.js --repo {{REPO}} --daemon --interval {{INTERVAL}}
+    deno run --allow-all src/main.ts daemon --repo {{REPO}} --interval {{INTERVAL}}
+
+# Compile to AOT binary
+compile: build
+    deno task compile:aot
 
 # Run tests
 test:
-    npm test
+    deno task test
 
 # Type check
 check:
-    npm run build
+    deno check src/main.ts
 
-# Format code (using rescript format)
-format:
-    find src -name "*.res" -exec rescript format {} \;
+# Lint code
+lint:
+    deno lint src/ tests/
 
-# Start ArangoDB in Docker
-arango-start:
-    docker run -d \
-        --name recon-arango \
-        -p 8529:8529 \
-        -e ARANGO_ROOT_PASSWORD=dev \
-        arangodb/arangodb:latest
-
-# Stop ArangoDB
-arango-stop:
-    docker stop recon-arango
-    docker rm recon-arango
-
-# ArangoDB logs
-arango-logs:
-    docker logs -f recon-arango
+# Format code
+fmt:
+    deno fmt src/ tests/ scripts/
 
 # Full development setup
-dev-setup: install arango-start
-    @echo "Development environment ready!"
-    @echo "ArangoDB: http://localhost:8529 (root/dev)"
+dev-setup: install-deno install-rust build
+    @echo "✅ Development environment ready!"
 
-# Run full pipeline with local ArangoDB
-dev-run REPO:
-    node lib/js/src/CLI.bs.js \
-        --repo {{REPO}} \
-        --arango-url http://localhost:8529 \
-        --arango-password dev
+# Podman build
+podman-build:
+    podman build -t recon-silly-ation:latest -f Containerfile .
 
-# Generate documentation
-docs:
-    @echo "Generating documentation..."
-    @echo "See docs/ directory for architecture and implementation details"
-
-# CCCP compliance check
-cccp-check REPO:
-    @echo "Running CCCP compliance check..."
-    node lib/js/src/CLI.bs.js --repo {{REPO}} --cccp-only
-
-# Generate report
-report REPO:
-    node lib/js/src/CLI.bs.js --repo {{REPO}} --report-only
+# Podman compose up
+podman-up:
+    podman-compose up
 
 # Full CI check
-ci: install build test
-    @echo "CI checks passed!"
+ci: lint check test
+    @echo "✅ CI checks passed!"
 
-# Production build
-prod: clean install build
-    @echo "Production build complete!"
-
-# Docker build
-docker-build:
-    docker build -t recon-silly-ation:latest .
-
-# Docker run
-docker-run REPO:
-    docker run --rm \
-        -v {{REPO}}:/workspace \
-        -e ARANGO_URL=http://host.docker.internal:8529 \
-        recon-silly-ation:latest \
-        --repo /workspace
-
-# Initialize new repository for reconciliation
-init REPO:
-    @echo "Initializing {{REPO}} for documentation reconciliation..."
-    mkdir -p {{REPO}}/.recon
-    cp examples/config.json {{REPO}}/.recon/config.json
-    @echo "Configuration created at {{REPO}}/.recon/config.json"
-
-# Validate repository structure
-validate REPO:
-    @echo "Validating {{REPO}}..."
-    node lib/js/src/CLI.bs.js --repo {{REPO}} --validate-only
-
-# Export database to JSON
-export-db OUTPUT="export.json":
-    @echo "Exporting database to {{OUTPUT}}..."
-    node lib/js/src/CLI.bs.js --export {{OUTPUT}}
-
-# Import database from JSON
-import-db INPUT:
-    @echo "Importing database from {{INPUT}}..."
-    node lib/js/src/CLI.bs.js --import {{INPUT}}
-
-# Backup database
-backup:
-    @echo "Backing up database..."
-    mkdir -p backups
-    node lib/js/src/CLI.bs.js --export backups/backup-$(date +%Y%m%d-%H%M%S).json
-
-# Restore database from backup
-restore BACKUP:
-    @echo "Restoring from {{BACKUP}}..."
-    node lib/js/src/CLI.bs.js --import {{BACKUP}}
-
-# Show project statistics
-stats REPO:
-    @echo "=== Repository Statistics ==="
-    @echo "Total files:"
-    @find {{REPO}} -type f | wc -l
-    @echo "Documentation files:"
-    @find {{REPO}} -type f -name "*.md" | wc -l
-    @echo "Python files (CCCP violations):"
-    @find {{REPO}} -type f -name "*.py" | wc -l
-
-# Help message
+# Help
 help:
-    @echo "recon-silly-ation - Documentation Reconciliation System"
+    @echo "recon-silly-ation - Deno + WASM Edition"
     @echo ""
-    @echo "Common commands:"
-    @echo "  just install          - Install dependencies"
-    @echo "  just build            - Build the project"
-    @echo "  just scan REPO        - Scan a repository"
-    @echo "  just dev-setup        - Setup development environment"
-    @echo "  just dev-run REPO     - Run with local ArangoDB"
+    @echo "  just build            - Build WASM + cache deps"
+    @echo "  just scan REPO        - Scan repository"
+    @echo "  just compile          - Compile AOT binary"
     @echo "  just test             - Run tests"
-    @echo "  just cccp-check REPO  - Check CCCP compliance"
+    @echo "  just podman-build     - Build container"
     @echo ""
-    @echo "For full list: just --list"
+    @echo "Full list: just --list"

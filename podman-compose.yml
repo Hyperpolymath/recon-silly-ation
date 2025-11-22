@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # ArangoDB database
   arangodb:
-    image: arangodb/arangodb:3.11
+    image: docker.io/arangodb/arangodb:3.11
     container_name: recon-arango
     environment:
       ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD:-development}
@@ -21,9 +21,11 @@ services:
       retries: 5
       start_period: 40s
 
-  # Documentation reconciliation service
+  # Documentation reconciliation service (Deno + WASM)
   reconciliation:
-    build: .
+    build:
+      context: .
+      dockerfile: Containerfile
     container_name: recon-service
     depends_on:
       arangodb:
@@ -33,22 +35,24 @@ services:
       ARANGO_DATABASE: ${ARANGO_DATABASE:-reconciliation}
       ARANGO_USERNAME: ${ARANGO_USERNAME:-root}
       ARANGO_PASSWORD: ${ARANGO_PASSWORD:-development}
-      NODE_ENV: ${NODE_ENV:-production}
+      DENO_DIR: /deno-dir
     volumes:
       - ./data:/data
       - ${REPO_PATH:-./examples}:/workspace:ro
+      - deno-cache:/deno-dir
     networks:
       - recon-network
     command: >
       sh -c "
+        echo '⚡ Deno + WASM Documentation Reconciliation System' &&
         echo 'Waiting for ArangoDB...' &&
         sleep 10 &&
-        node lib/js/src/CLI.bs.js --repo /workspace --daemon --interval 300
+        deno run --allow-all src/main.ts daemon --repo /workspace --interval 300
       "
 
-  # Optional: Graph visualization service
+  # Optional: ArangoDB UI
   arangodb-ui:
-    image: arangodb/arangodb:3.11
+    image: docker.io/arangodb/arangodb:3.11
     container_name: recon-arango-ui
     depends_on:
       - arangodb
@@ -70,11 +74,21 @@ volumes:
     driver: local
   arango-apps:
     driver: local
+  deno-cache:
+    driver: local
 
 # Usage:
-#   Development: docker-compose up
-#   With UI:     docker-compose --profile ui up
-#   Background:  docker-compose up -d
-#   Logs:        docker-compose logs -f reconciliation
-#   Stop:        docker-compose down
-#   Clean:       docker-compose down -v  (removes volumes)
+#   Development: podman-compose up
+#   With UI:     podman-compose --profile ui up
+#   Background:  podman-compose up -d
+#   Logs:        podman-compose logs -f reconciliation
+#   Stop:        podman-compose down
+#   Clean:       podman-compose down -v  (removes volumes)
+#
+# Build and run:
+#   podman-compose build
+#   podman-compose up
+#
+# Environment variables:
+#   ARANGO_PASSWORD=yourpass podman-compose up
+#   REPO_PATH=/my/repo podman-compose up
