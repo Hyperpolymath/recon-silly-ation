@@ -11,7 +11,7 @@
 (define-public recon_silly_ation
   (package
     (name "recon-silly-ation")
-    (version "0.1.0")
+    (version "0.2.0")
     (source (local-file "." "recon-silly-ation-checkout"
                         #:recursive? #t
                         #:select? (git-predicate ".")))

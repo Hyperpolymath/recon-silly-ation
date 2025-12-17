@@ -100,10 +100,11 @@ When using recon-silly-ation:
    - Maintain audit trail
 
 3. **Dependencies**
-   - Regularly update dependencies (`npm audit`)
+   - Regularly update dependencies (`deno outdated`)
    - Review dependency security advisories
-   - Use lock files (`package-lock.json`)
+   - Use Deno lock files (`deno.lock`)
    - Minimize dependency count
+   - Use `deno.json` imports for dependency management
 
 ## Known Security Considerations
 
