@@ -16,6 +16,14 @@ serde-wasm-bindgen = "0.6"
 thiserror = "2.0"
 js-sys = "0.3"
 
+# formatrix-docs integration (local path for development)
+# formatrix-core = { path = "../../formatrix-docs/crates/formatrix-core" }
+
+# Format parsing libraries (same as formatrix-docs)
+comrak = "0.49"          # Markdown (GFM)
+jotdown = "0.7"          # Djot
+orgize = "0.9"           # Org-mode
+
 [profile.release]
 opt-level = "z"     # Optimize for size
 lto = true          # Link-time optimization

@@ -239,6 +239,10 @@ pub enum Value {
     Nil,
     /// Validation result
     ValidationResult(ValidationResult),
+    /// Document format
+    Format(String),
+    /// Parsed document structure
+    Structure(Box<super::formats::DocumentStructure>),
 }
 
 impl Value {
@@ -257,6 +261,8 @@ impl Value {
             Value::Quotation(_) => "Quotation",
             Value::Nil => "Nil",
             Value::ValidationResult(_) => "ValidationResult",
+            Value::Format(_) => "Format",
+            Value::Structure(_) => "Structure",
         }
     }
 

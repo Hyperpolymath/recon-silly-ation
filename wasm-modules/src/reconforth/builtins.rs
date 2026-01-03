@@ -109,6 +109,17 @@ pub fn register_builtins(vm: &mut VM) {
     // Debug
     vm.register_native(".s", builtin_print_stack);
     vm.register_native(".v", builtin_print_validation);
+
+    // Format detection and parsing
+    vm.register_native("detect-format", builtin_detect_format);
+    vm.register_native("parse-doc", builtin_parse_doc);
+    vm.register_native("doc-structure", builtin_doc_structure);
+    vm.register_native("structure-title", builtin_structure_title);
+    vm.register_native("structure-headings", builtin_structure_headings);
+    vm.register_native("structure-links", builtin_structure_links);
+    vm.register_native("structure-code-blocks", builtin_structure_code_blocks);
+    vm.register_native("has-heading?", builtin_has_heading);
+    vm.register_native("has-code-lang?", builtin_has_code_lang);
 }
 
 // ============================================================================
@@ -793,6 +804,152 @@ fn builtin_print_validation(vm: &mut VM) -> Result<(), Error> {
     }
     for s in &v.suggestions {
         eprintln!("  SUGGEST: {}", s.message);
+    }
+    Ok(())
+}
+
+// ============================================================================
+// Format detection and parsing
+// ============================================================================
+
+fn builtin_detect_format(vm: &mut VM) -> Result<(), Error> {
+    let content = vm.pop_str()?;
+    let format = super::formats::detect_format(&content);
+    vm.push(Value::Format(format.as_str().to_string()));
+    Ok(())
+}
+
+fn builtin_parse_doc(vm: &mut VM) -> Result<(), Error> {
+    let content = vm.pop_str()?;
+    let structure = super::formats::parse_content(&content)?;
+    vm.push(Value::Structure(Box::new(structure)));
+    Ok(())
+}
+
+fn builtin_doc_structure(vm: &mut VM) -> Result<(), Error> {
+    let doc = vm.pop_doc()?;
+    let structure = super::formats::parse_content(&doc.content)?;
+    vm.push(Value::Structure(Box::new(structure)));
+    Ok(())
+}
+
+fn builtin_structure_title(vm: &mut VM) -> Result<(), Error> {
+    let val = vm.pop()?;
+    match val {
+        Value::Structure(s) => {
+            match &s.title {
+                Some(t) => vm.push(Value::Str(t.clone())),
+                None => vm.push(Value::Nil),
+            }
+        }
+        _ => return Err(Error::TypeError {
+            expected: "Structure".to_string(),
+            got: val.type_name().to_string(),
+        }),
+    }
+    Ok(())
+}
+
+fn builtin_structure_headings(vm: &mut VM) -> Result<(), Error> {
+    let val = vm.pop()?;
+    match val {
+        Value::Structure(s) => {
+            let headings: Vec<Value> = s.headings
+                .iter()
+                .map(|(level, text)| {
+                    Value::List(vec![
+                        Value::Int(*level as i64),
+                        Value::Str(text.clone()),
+                    ])
+                })
+                .collect();
+            vm.push(Value::List(headings));
+        }
+        _ => return Err(Error::TypeError {
+            expected: "Structure".to_string(),
+            got: val.type_name().to_string(),
+        }),
+    }
+    Ok(())
+}
+
+fn builtin_structure_links(vm: &mut VM) -> Result<(), Error> {
+    let val = vm.pop()?;
+    match val {
+        Value::Structure(s) => {
+            let links: Vec<Value> = s.links
+                .iter()
+                .map(|(text, url)| {
+                    Value::List(vec![
+                        Value::Str(text.clone()),
+                        Value::Str(url.clone()),
+                    ])
+                })
+                .collect();
+            vm.push(Value::List(links));
+        }
+        _ => return Err(Error::TypeError {
+            expected: "Structure".to_string(),
+            got: val.type_name().to_string(),
+        }),
+    }
+    Ok(())
+}
+
+fn builtin_structure_code_blocks(vm: &mut VM) -> Result<(), Error> {
+    let val = vm.pop()?;
+    match val {
+        Value::Structure(s) => {
+            let blocks: Vec<Value> = s.code_blocks
+                .iter()
+                .map(|(lang, code)| {
+                    Value::List(vec![
+                        match lang {
+                            Some(l) => Value::Str(l.clone()),
+                            None => Value::Nil,
+                        },
+                        Value::Str(code.clone()),
+                    ])
+                })
+                .collect();
+            vm.push(Value::List(blocks));
+        }
+        _ => return Err(Error::TypeError {
+            expected: "Structure".to_string(),
+            got: val.type_name().to_string(),
+        }),
+    }
+    Ok(())
+}
+
+fn builtin_has_heading(vm: &mut VM) -> Result<(), Error> {
+    let text = vm.pop_str()?;
+    let val = vm.pop()?;
+    match val {
+        Value::Structure(s) => {
+            let has = super::formats::has_heading(&s, &text);
+            vm.push(Value::Bool(has));
+        }
+        _ => return Err(Error::TypeError {
+            expected: "Structure".to_string(),
+            got: val.type_name().to_string(),
+        }),
+    }
+    Ok(())
+}
+
+fn builtin_has_code_lang(vm: &mut VM) -> Result<(), Error> {
+    let lang = vm.pop_str()?;
+    let val = vm.pop()?;
+    match val {
+        Value::Structure(s) => {
+            let has = super::formats::has_code_language(&s, &lang);
+            vm.push(Value::Bool(has));
+        }
+        _ => return Err(Error::TypeError {
+            expected: "Structure".to_string(),
+            got: val.type_name().to_string(),
+        }),
     }
     Ok(())
 }
