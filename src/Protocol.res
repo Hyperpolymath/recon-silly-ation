@@ -66,6 +66,7 @@ type generationRequest = {
   requestedAt: float,
 }
 
+// SEAM-2A: Repository context - aligned with Docubot.res
 and repoContext = {
   name: string,
   description: option<string>,
@@ -73,6 +74,9 @@ and repoContext = {
   license: option<string>,
   topics: array<string>,
   existingDocs: array<string>,
+  // Additional fields for Docubot integration
+  dependencies: option<array<string>>,
+  readme: option<string>,
 }
 
 type generationResponse = {
